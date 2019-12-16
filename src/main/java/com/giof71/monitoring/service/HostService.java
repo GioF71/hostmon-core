@@ -5,13 +5,15 @@ import java.util.Optional;
 
 import com.giof71.monitoring.model.MonitoredHost;
 import com.giof71.monitoring.service.exc.AlreadyExists;
+import com.giof71.monitoring.service.exc.NotFound;
 
 public interface HostService {
-	MonitoredHost addHost(String friendlyName, String address) throws AlreadyExists;
+	MonitoredHost add(String friendlyName, String address) throws AlreadyExists;
 	List<MonitoredHost> findAll();
-	long getHostCount();
-	void remove(Long id);
-	Optional<MonitoredHost> getHost(Long hostId);
+	long count();
+	void removeById(Long id);
+	Optional<MonitoredHost> getById(Long hostId);
+	MonitoredHost getByFriendlyName(String friendlyName) throws NotFound;
 	MonitoredHost save(MonitoredHost monitoredHost);
 }
 

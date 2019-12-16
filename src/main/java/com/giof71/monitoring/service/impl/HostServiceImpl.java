@@ -13,6 +13,7 @@ import com.giof71.monitoring.model.MonitoredHost;
 import com.giof71.monitoring.repository.HostRepository;
 import com.giof71.monitoring.service.HostService;
 import com.giof71.monitoring.service.exc.AlreadyExists;
+import com.giof71.monitoring.service.exc.NotFound;
 
 @Component
 public class HostServiceImpl implements HostService {
@@ -21,13 +22,13 @@ public class HostServiceImpl implements HostService {
 	private HostRepository hostRepository;
 
 	@Override
-	public long getHostCount() {
+	public long count() {
 		return hostRepository.count();
 	}
 
 	@Transactional
 	@Override
-	public MonitoredHost addHost(String friendlyName, String address) throws AlreadyExists {
+	public MonitoredHost add(String friendlyName, String address) throws AlreadyExists {
 		if (hostRepository.getByFriendlyName(friendlyName) == null) {
 			MonitoredHost host = new MonitoredHost();
 			host.setFriendlyName(friendlyName);
@@ -48,13 +49,19 @@ public class HostServiceImpl implements HostService {
 
 	@Transactional
 	@Override
-	public void remove(Long id) {
+	public void removeById(Long id) {
 		hostRepository.deleteById(id);
 	}
 
 	@Override
-	public Optional<MonitoredHost> getHost(Long hostId) {
+	public Optional<MonitoredHost> getById(Long hostId) {
 		return hostRepository.findById(hostId);
+	}
+
+	@Override
+	public MonitoredHost getByFriendlyName(String friendlyName) throws NotFound {
+		return Optional.ofNullable(hostRepository.getByFriendlyName(friendlyName))
+			.orElseThrow(() -> new NotFound(MonitoredHost.class, friendlyName));
 	}
 
 	@Transactional
