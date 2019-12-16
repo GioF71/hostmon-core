@@ -8,9 +8,10 @@ import com.giof71.monitoring.dto.structure.UpdateAddress;
 import com.giof71.monitoring.dto.structure.decorated.concrete.HostResult;
 import com.giof71.monitoring.dto.structure.decorated.concrete.NewHostResult;
 
-public interface HostManager {
+public interface HostManagement {
 	NewHostResult add(NewHost newHost);
 	HostResult get(String friendlyName);
 	HostResult updateAddress(UpdateAddress updateAddress);
 	List<Host> list();
+	Long count();
 }

@@ -19,13 +19,13 @@ import com.giof71.monitoring.dto.structure.decorated.concrete.HostResult;
 import com.giof71.monitoring.dto.structure.decorated.concrete.NewHostResult;
 import com.giof71.monitoring.error.ConfigurationError;
 import com.giof71.monitoring.model.MonitoredHost;
-import com.giof71.monitoring.rest.HostManager;
+import com.giof71.monitoring.rest.HostManagement;
 import com.giof71.monitoring.service.HostService;
 import com.giof71.monitoring.service.exc.AlreadyExists;
 import com.giof71.monitoring.service.exc.NotFound;
 
 @RestController
-public class HostManagerImpl implements HostManager {
+public class HostManagementImpl implements HostManagement {
 	
 	@Autowired
 	private HostService hostService;
@@ -39,6 +39,12 @@ public class HostManagerImpl implements HostManager {
 			result.add(convertToDto(current));
 		}
 		return result;
+	}
+
+	@Override
+	@GetMapping(value = "/host-management/count")
+	public Long count() {
+		return hostService.count();
 	}
 
 	@Override
