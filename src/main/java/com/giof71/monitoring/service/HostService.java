@@ -9,6 +9,7 @@ import com.giof71.monitoring.service.exc.NotFound;
 
 public interface HostService {
 	MonitoredHost add(String friendlyName, String address) throws AlreadyExists;
+	MonitoredHost updateAddress(String friendlyName, String address) throws NotFound; 
 	List<MonitoredHost> findAll();
 	long count();
 	void removeById(Long id);

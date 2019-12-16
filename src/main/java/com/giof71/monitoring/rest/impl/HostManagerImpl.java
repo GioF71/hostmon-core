@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.giof71.monitoring.dto.structure.Host;
 import com.giof71.monitoring.dto.structure.NewHost;
+import com.giof71.monitoring.dto.structure.UpdateAddress;
 import com.giof71.monitoring.dto.structure.decorated.concrete.HostResult;
 import com.giof71.monitoring.dto.structure.decorated.concrete.NewHostResult;
 import com.giof71.monitoring.error.ConfigurationError;
@@ -30,7 +31,7 @@ public class HostManagerImpl implements HostManager {
 	private HostService hostService;
 	
 	@Override
-	@GetMapping(value = "/hosts/list")
+	@GetMapping(value = "/host-management/hosts")
 	public List<Host> list() {
 		List<MonitoredHost> list = hostService.findAll();
 		List<Host> result = new ArrayList<>();
@@ -41,20 +42,40 @@ public class HostManagerImpl implements HostManager {
 	}
 
 	@Override
-	@PutMapping(value = "/hosts/add")
+	@PutMapping(value = "/host-management/add")
 	public NewHostResult add(@RequestBody NewHost newHost) {
 		NewHostResult result = new NewHostResult();
 		try {
 			MonitoredHost newMonitoredHost = hostService.add(newHost.getFriendlyName(), newHost.getAddress());
 			result.setData(convertToDto(newMonitoredHost));
-		} catch (AlreadyExists exc) {
-			result.getOperationResult().fail(ConfigurationError.HOST_ALREADY_EXISTS.name(), exc.getMessage());
+		} catch (AlreadyExists alreadyExists) {
+			result.getOperationResult().fail(ConfigurationError.HOST_ALREADY_EXISTS.name(), alreadyExists.getMessage());
+		} catch (Exception e) {
+			result.getOperationResult().fail(
+				ConfigurationError.UNSPECIFIED_ERROR.name(),
+				String.format("An %s of type [%s] occurred", 
+					Exception.class.getSimpleName(),
+					e.getClass().getSimpleName()));
+				
 		}
 		return result;
 	}
 
 	@Override
-	@GetMapping(value = "/hosts/{friendlyName}")
+	@PutMapping(value = "/host-management/update-address")
+	public HostResult updateAddress(@RequestBody UpdateAddress updateAddress) {
+		HostResult result = new HostResult();
+		try {
+			MonitoredHost host = hostService.updateAddress(updateAddress.getFriendlyName(), updateAddress.getNewAddress());
+			result.setData(convertToDto(host));
+		} catch (NotFound exc) {
+			result.getOperationResult().fail(ConfigurationError.HOST_NOT_FOUND.name(), exc.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	@GetMapping(value = "/host-management/hosts/{friendlyName}")
 	public HostResult get(@PathVariable String friendlyName) {
 		HostResult result = new HostResult();
 		try {

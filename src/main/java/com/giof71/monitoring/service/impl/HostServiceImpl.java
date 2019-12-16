@@ -1,6 +1,6 @@
 package com.giof71.monitoring.service.impl;
 
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +21,7 @@ public class HostServiceImpl implements HostService {
 	@Autowired
 	private HostRepository hostRepository;
 
+	@Transactional
 	@Override
 	public long count() {
 		return hostRepository.count();
@@ -40,11 +41,20 @@ public class HostServiceImpl implements HostService {
 		}
 	}
 
+	@Transactional
+	@Override
+	public MonitoredHost updateAddress(String friendlyName, String address) throws NotFound {
+		MonitoredHost host = hostRepository.getByFriendlyName(friendlyName);
+		host.setAddress(address);
+		host.setUpdateTimestamp(Calendar.getInstance());
+		hostRepository.save(host);
+		return host;
+	}
+
+	@Transactional
 	@Override
 	public List<MonitoredHost> findAll() {
-		List<MonitoredHost> list = new ArrayList<>();
-		hostRepository.findAll().forEach(list::add);
-		return list;
+		return hostRepository.findAllByOrderByFriendlyNameAsc();
 	}
 
 	@Transactional
@@ -53,11 +63,13 @@ public class HostServiceImpl implements HostService {
 		hostRepository.deleteById(id);
 	}
 
+	@Transactional
 	@Override
 	public Optional<MonitoredHost> getById(Long hostId) {
 		return hostRepository.findById(hostId);
 	}
 
+	@Transactional
 	@Override
 	public MonitoredHost getByFriendlyName(String friendlyName) throws NotFound {
 		return Optional.ofNullable(hostRepository.getByFriendlyName(friendlyName))
