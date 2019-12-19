@@ -18,6 +18,8 @@ import com.giof71.monitoring.dto.structure.Host;
 import com.giof71.monitoring.dto.structure.NewHost;
 import com.giof71.monitoring.dto.structure.UpdateAddress;
 import com.giof71.monitoring.dto.structure.decorated.concrete.DeleteHostResult;
+import com.giof71.monitoring.dto.structure.decorated.concrete.HostList;
+import com.giof71.monitoring.dto.structure.decorated.concrete.HostListData;
 import com.giof71.monitoring.dto.structure.decorated.concrete.HostResult;
 import com.giof71.monitoring.dto.structure.decorated.concrete.NewHostResult;
 import com.giof71.monitoring.error.ConfigurationError;
@@ -35,13 +37,22 @@ public class HostManagementImpl implements HostManagement {
 	
 	@Override
 	@GetMapping(value = "/host-management/hosts")
-	public List<Host> list() {
-		List<MonitoredHost> list = hostService.findAll();
-		List<Host> result = new ArrayList<>();
-		for (MonitoredHost current : Optional.ofNullable(list).orElse(Collections.emptyList())) {
-			result.add(convertToDto(current));
+	public HostList list() {
+		HostList hostList = new HostList();
+		try {
+			List<MonitoredHost> monitoredHostList = hostService.findAll();
+			List<Host> list = new ArrayList<>();
+			for (MonitoredHost current : Optional.ofNullable(monitoredHostList).orElse(Collections.emptyList())) {
+				list.add(convertToDto(current));
+			}
+			HostListData hostListData = new HostListData();
+			hostListData.setCount(list.size());
+			hostListData.setHostList(list);
+			hostList.setData(hostListData);
+		} catch (Exception exc) {
+			setUnspecifiedError(hostList.getOperationResult(), exc);
 		}
-		return result;
+		return hostList;
 	}
 
 	@Override
