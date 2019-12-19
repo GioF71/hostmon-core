@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.giof71.monitoring.dto.OperationResult;
 import com.giof71.monitoring.dto.structure.Host;
 import com.giof71.monitoring.dto.structure.NewHost;
 import com.giof71.monitoring.dto.structure.UpdateAddress;
@@ -59,12 +60,7 @@ public class HostManagementImpl implements HostManagement {
 		} catch (AlreadyExists alreadyExists) {
 			result.getOperationResult().fail(ConfigurationError.HOST_ALREADY_EXISTS.name(), alreadyExists.getMessage());
 		} catch (Exception e) {
-			result.getOperationResult().fail(
-				ConfigurationError.UNSPECIFIED_ERROR.name(),
-				String.format("An %s of type [%s] occurred", 
-					Exception.class.getSimpleName(),
-					e.getClass().getSimpleName()));
-				
+			setUnspecifiedError(result.getOperationResult(), e);
 		}
 		return result;
 	}
@@ -78,6 +74,8 @@ public class HostManagementImpl implements HostManagement {
 			result.setData(convertToDto(host));
 		} catch (NotFound exc) {
 			result.getOperationResult().fail(ConfigurationError.HOST_NOT_FOUND.name(), exc.getMessage());
+		} catch (Exception e) {
+			setUnspecifiedError(result.getOperationResult(), e);
 		}
 		return result;
 	}
@@ -91,6 +89,8 @@ public class HostManagementImpl implements HostManagement {
 			result.setData(convertToDto(host));
 		} catch (NotFound exc) {
 			result.getOperationResult().fail(ConfigurationError.HOST_NOT_FOUND.name(), exc.getMessage());
+		} catch (Exception e) {
+			setUnspecifiedError(result.getOperationResult(), e);
 		}
 		return result;
 	}
@@ -105,6 +105,8 @@ public class HostManagementImpl implements HostManagement {
 			result.setData(convertToDto(host));
 		} catch (NotFound exc) {
 			result.getOperationResult().fail(ConfigurationError.HOST_NOT_FOUND.name(), exc.getMessage());
+		} catch (Exception e) {
+			setUnspecifiedError(result.getOperationResult(), e);
 		}
 		return result;
 	}
@@ -117,5 +119,14 @@ public class HostManagementImpl implements HostManagement {
 		host.setCreationTimestamp(monitoredHost.getCreationTimestamp());
 		host.setUpdateTimestamp(monitoredHost.getUpdateTimestamp());
 		return host;
+	}
+
+	private void setUnspecifiedError(OperationResult operationResult, Exception exc) {
+		operationResult.fail(
+			ConfigurationError.UNSPECIFIED_ERROR.name(),
+			String.format("An %s of type [%s] occurred", 
+				Exception.class.getSimpleName(),
+				exc.getClass().getSimpleName()));
+		exc.printStackTrace(System.err);
 	}
 }
