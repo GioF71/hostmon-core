@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.giof71.monitoring.dto.structure.Host;
 import com.giof71.monitoring.dto.structure.NewHost;
 import com.giof71.monitoring.dto.structure.UpdateAddress;
+import com.giof71.monitoring.dto.structure.decorated.concrete.DeleteHostResult;
 import com.giof71.monitoring.dto.structure.decorated.concrete.HostResult;
 import com.giof71.monitoring.dto.structure.decorated.concrete.NewHostResult;
 import com.giof71.monitoring.error.ConfigurationError;
@@ -86,6 +88,20 @@ public class HostManagementImpl implements HostManagement {
 		HostResult result = new HostResult();
 		try {
 			MonitoredHost host = hostService.getByFriendlyName(friendlyName);
+			result.setData(convertToDto(host));
+		} catch (NotFound exc) {
+			result.getOperationResult().fail(ConfigurationError.HOST_NOT_FOUND.name(), exc.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	@PostMapping(value = "/host-management/delete/{friendlyName}")
+	public DeleteHostResult delete(@PathVariable String friendlyName) {
+		DeleteHostResult result = new DeleteHostResult();
+		try {
+			MonitoredHost host = hostService.getByFriendlyName(friendlyName);
+			hostService.removeById(host.getId());
 			result.setData(convertToDto(host));
 		} catch (NotFound exc) {
 			result.getOperationResult().fail(ConfigurationError.HOST_NOT_FOUND.name(), exc.getMessage());

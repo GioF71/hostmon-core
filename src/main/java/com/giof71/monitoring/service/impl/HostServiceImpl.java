@@ -30,7 +30,7 @@ public class HostServiceImpl implements HostService {
 	@Transactional
 	@Override
 	public MonitoredHost add(String friendlyName, String address) throws AlreadyExists {
-		if (hostRepository.getByFriendlyName(friendlyName) == null) {
+		if (!hostRepository.existsByFriendlyName(friendlyName)) {
 			MonitoredHost host = new MonitoredHost();
 			host.setFriendlyName(friendlyName);
 			host.setAddress(address);
@@ -44,7 +44,7 @@ public class HostServiceImpl implements HostService {
 	@Transactional
 	@Override
 	public MonitoredHost updateAddress(String friendlyName, String address) throws NotFound {
-		MonitoredHost host = hostRepository.getByFriendlyName(friendlyName);
+		MonitoredHost host = getByFriendlyName(friendlyName);
 		host.setAddress(address);
 		host.setUpdateTimestamp(Calendar.getInstance());
 		hostRepository.save(host);
